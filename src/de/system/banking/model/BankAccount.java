@@ -1,4 +1,4 @@
-package de.banking.spl.model;
+package de.system.banking.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +7,7 @@ public class BankAccount {
 
 	private Long id;
 	private Long balance;
-	private List<Transaction> transactions = new ArrayList<Transaction>();
+	private List<BankingTransaction> bankingTransactions = new ArrayList<BankingTransaction>();
 	private boolean overDraftEligible;
 	private Long customer_id;
 
@@ -19,9 +19,9 @@ public class BankAccount {
 		this.balance = balance;
 	}
 
-	public BankAccount(Long balance, List<Transaction> transactions, boolean overDraftEligible, Long customer_id) {
+	public BankAccount(Long balance, List<BankingTransaction> bankingTransactions, boolean overDraftEligible, Long customer_id) {
 		this.balance = balance;
-		this.transactions = transactions;
+		this.bankingTransactions = bankingTransactions;
 		this.overDraftEligible = overDraftEligible;
 		this.customer_id = customer_id;
 	}
@@ -50,12 +50,12 @@ public class BankAccount {
 		this.balance = balance;
 	}
 
-	public List<Transaction> getTransactions() {
-		return transactions;
+	public List<BankingTransaction> getTransactions() {
+		return bankingTransactions;
 	}
 
-	public void setTransactions(List<Transaction> transactions) {
-		this.transactions = transactions;
+	public void setTransactions(List<BankingTransaction> bankingTransactions) {
+		this.bankingTransactions = bankingTransactions;
 	}
 
 	public boolean isOverDraftEligible() {

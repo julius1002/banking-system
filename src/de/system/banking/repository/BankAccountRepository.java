@@ -1,9 +1,9 @@
-package de.banking.spl.repository;
+package de.system.banking.repository;
 
 import java.util.List;
 import java.util.Optional;
 
-import de.banking.spl.model.BankAccount;
+import de.system.banking.model.BankAccount;
 
 public interface BankAccountRepository {
 

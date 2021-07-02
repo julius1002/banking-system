@@ -1,10 +1,9 @@
-package de.banking.spl.repository;
+package de.system.banking.repository;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-import de.banking.spl.model.BankAccount;
-import de.banking.spl.model.Customer;
+import de.system.banking.model.Customer;
 
 public class InMemoryCustomerRepository implements CustomerRepository {
 

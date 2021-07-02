@@ -1,4 +1,4 @@
-package de.banking.spl.service.oidc;
+package de.system.banking.service;
 
 import java.io.IOException;
 import java.net.URI;
@@ -7,6 +7,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 public class ResourceOwnerPasswordCredentialsService implements OpenIdConnectService {
+
     private HttpClient client;
 
     private String authorizationServerUri;

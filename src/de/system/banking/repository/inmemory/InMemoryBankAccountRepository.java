@@ -1,12 +1,14 @@
-package de.banking.spl.repository;
+package de.system.banking.repository.inmemory;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-import de.banking.spl.model.BankAccount;
+import de.system.banking.model.BankAccount;
+import de.system.banking.repository.BankAccountRepository;
 
-public class InMemoryBankAccountRepository implements BankAccountRepository{
+public class InMemoryBankAccountRepository implements BankAccountRepository {
 
 	private List<BankAccount> bankAccounts;
 	
@@ -45,7 +47,7 @@ public class InMemoryBankAccountRepository implements BankAccountRepository{
 	}
 
 	@Override
-	public List<BankAccount> findByCustomerId(Long customerId) throws Exception {
-		return null;
+	public List<BankAccount> findByCustomerId(Long customerId) {
+		return Collections.emptyList();
 	}
 }

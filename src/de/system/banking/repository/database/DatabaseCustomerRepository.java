@@ -1,9 +1,9 @@
-package de.banking.spl.repository.database;
+package de.system.banking.repository.database;
 
-import de.banking.spl.model.BankAccount;
-import de.banking.spl.model.Customer;
-import de.banking.spl.repository.BankAccountRepository;
-import de.banking.spl.repository.CustomerRepository;
+import de.system.banking.model.BankAccount;
+import de.system.banking.model.Customer;
+import de.system.banking.repository.BankAccountRepository;
+import de.system.banking.repository.CustomerRepository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

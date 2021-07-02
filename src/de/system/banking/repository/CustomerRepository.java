@@ -1,8 +1,8 @@
-package de.banking.spl.repository;
+package de.system.banking.repository;
 
 import java.util.Optional;
 
-import de.banking.spl.model.Customer;
+import de.system.banking.model.Customer;
 
 public interface CustomerRepository {
 

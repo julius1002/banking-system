@@ -1,8 +1,8 @@
-package de.banking.spl.repository.database;
+package de.system.banking.repository.database;
 
-import de.banking.spl.model.BankAccount;
-import de.banking.spl.model.Transaction;
-import de.banking.spl.repository.BankAccountRepository;
+import de.system.banking.model.BankAccount;
+import de.system.banking.model.BankingTransaction;
+import de.system.banking.repository.BankAccountRepository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,11 +16,11 @@ import static java.sql.Statement.RETURN_GENERATED_KEYS;
 public class DatabaseBankAccountRepository implements BankAccountRepository {
 
     private final Connection connection;
-    private DatabaseTransactionRepository dataBaseTransactionRepository;
+    private DatabaseBankingTransactionRepository dataBaseBankingTransactionRepository;
 
-    public DatabaseBankAccountRepository(Connection connection, DatabaseTransactionRepository dataBaseTransactionRepository) {
+    public DatabaseBankAccountRepository(Connection connection, DatabaseBankingTransactionRepository dataBaseBankingTransactionRepository) {
         this.connection = connection;
-        this.dataBaseTransactionRepository = dataBaseTransactionRepository;
+        this.dataBaseBankingTransactionRepository = dataBaseBankingTransactionRepository;
     }
 
     @Override
@@ -31,7 +31,7 @@ public class DatabaseBankAccountRepository implements BankAccountRepository {
         if (result.next()) {
             Long balance = result.getLong("balance");
             boolean overDraftEligible = result.getBoolean("overDraftEligible");
-            List<Transaction> transactionsByBankAccountId = this.dataBaseTransactionRepository.findByBankAccountId(id);
+            List<BankingTransaction> transactionsByBankAccountId = this.dataBaseBankingTransactionRepository.findByBankAccountId(id);
             Long customerId = result.getLong("customer_id");
             BankAccount bankAccount = new BankAccount();
             bankAccount.setBalance(balance);
@@ -62,8 +62,8 @@ public class DatabaseBankAccountRepository implements BankAccountRepository {
             bankAccount.setId(id);
         }
 
-        List<Transaction> transactions = dataBaseTransactionRepository.insertAll(bankAccount.getTransactions(), bankAccount.getId());
-        bankAccount.setTransactions(transactions);
+        List<BankingTransaction> bankingTransactions = dataBaseBankingTransactionRepository.insertAll(bankAccount.getTransactions(), bankAccount.getId());
+        bankAccount.setTransactions(bankingTransactions);
         return bankAccount;
     }
 
@@ -102,7 +102,7 @@ public class DatabaseBankAccountRepository implements BankAccountRepository {
             Long balance = result.getLong("balance");
             boolean overDraftEligible = result.getBoolean("overDraftEligible");
             long bankAccountId = result.getLong("id");
-            List<Transaction> transactionsByBankAccountId = this.dataBaseTransactionRepository.findByBankAccountId(bankAccountId);
+            List<BankingTransaction> transactionsByBankAccountId = this.dataBaseBankingTransactionRepository.findByBankAccountId(bankAccountId);
             BankAccount bankAccount = new BankAccount();
             bankAccount.setBalance(balance);
             bankAccount.setId(bankAccountId);

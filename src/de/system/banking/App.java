@@ -1,4 +1,4 @@
-package de.banking.spl;
+package de.system.banking;
 
 import java.net.http.HttpResponse;
 import java.sql.*;
@@ -6,17 +6,17 @@ import java.time.Instant;
 import java.util.*;
 
 import com.google.gson.*;
-import de.banking.spl.model.BankAccount;
-import de.banking.spl.model.Customer;
-import de.banking.spl.model.Transaction;
-import de.banking.spl.repository.BankAccountRepository;
-import de.banking.spl.repository.CustomerRepository;
-import de.banking.spl.repository.database.DatabaseBankAccountRepository;
-import de.banking.spl.repository.database.DatabaseCustomerRepository;
-import de.banking.spl.repository.database.DatabaseTransactionRepository;
-import de.banking.spl.repository.inmemory.InMemoryBankAccountRepository;
-import de.banking.spl.repository.inmemory.InMemoryCustomerRepository;
-import de.banking.spl.service.*;
+import de.system.banking.model.BankAccount;
+import de.system.banking.model.Customer;
+import de.system.banking.model.BankingTransaction;
+import de.system.banking.repository.BankAccountRepository;
+import de.system.banking.repository.CustomerRepository;
+import de.system.banking.repository.inmemory.InMemoryBankAccountRepository;
+import de.system.banking.repository.inmemory.InMemoryCustomerRepository;
+import de.system.banking.repository.database.DatabaseBankAccountRepository;
+import de.system.banking.repository.database.DatabaseCustomerRepository;
+import de.system.banking.repository.database.DatabaseBankingTransactionRepository;
+import de.system.banking.service.*;
 
 import static java.lang.System.*;
 
@@ -57,8 +57,8 @@ public class App {
             var connection = DriverManager.getConnection("jdbc:h2:~/test", "sa", "");
             createTables(connection);
 
-            DatabaseTransactionRepository databaseTransactionRepository = new DatabaseTransactionRepository(connection);
-            bankAccountRepository = new DatabaseBankAccountRepository(connection, databaseTransactionRepository);
+            DatabaseBankingTransactionRepository databaseBankingTransactionRepository = new DatabaseBankingTransactionRepository(connection);
+            bankAccountRepository = new DatabaseBankAccountRepository(connection, databaseBankingTransactionRepository);
             customerRepository = new DatabaseCustomerRepository(connection, bankAccountRepository);
 
             preRegisteredCustomer.setFirstName(preRegisteredCustomer.getFirstName() + "@DB");
@@ -66,7 +66,7 @@ public class App {
             bankAccounts.get(0).setCustomer_id(insert.getId());
             bankAccountRepository.insert(bankAccounts.get(0));
 
-            bankingService = new DatabaseBankingService(bankAccountRepository, databaseTransactionRepository);
+            bankingService = new DatabaseBankingService(bankAccountRepository, databaseBankingTransactionRepository);
 
         }
 
@@ -265,19 +265,19 @@ public class App {
                     }
                 }
                 if (choice.equals("4")) {
-                    List<Transaction> transactions = bankAccountRepository.findById(bankAccountId).get().getTransactions();
-                    log("You had " + transactions.size() + " transactions in the past");
-                    if (transactions.size() > 0) log("Date, Type, Amount, Failed\n-----------------------");
-                    for (Transaction transaction : transactions) {
-                        log(Instant.ofEpochMilli(transaction.getTime()) +
-                                ", " + transaction.getTransactionType() + ", " +
-                                transaction.getAmount() + ", " + transaction.isFailed());
+                    List<BankingTransaction> bankingTransactions = bankAccountRepository.findById(bankAccountId).get().getTransactions();
+                    log("You had " + bankingTransactions.size() + " transactions in the past");
+                    if (bankingTransactions.size() > 0) log("Date, Type, Amount, Failed\n-----------------------");
+                    for (BankingTransaction bankingTransaction : bankingTransactions) {
+                        log(Instant.ofEpochMilli(bankingTransaction.getTime()) +
+                                ", " + bankingTransaction.getTransactionType() + ", " +
+                                bankingTransaction.getAmount() + ", " + bankingTransaction.isFailed());
                     }
                 }
-                TransactionPrintingService transactionPrintingService = new TransactionPrintingService("./files");
+                BankingTransactionPrintingService bankingTransactionPrintingService = new BankingTransactionPrintingService("./files");
 
                 if (choice.equals("5")) {
-                    transactionPrintingService.createFile(bankAccountRepository.findById(bankAccountId).get().getTransactions(), foundCustomer.getFirstName() + "_" + foundCustomer.getLastName());
+                    bankingTransactionPrintingService.createFile(bankAccountRepository.findById(bankAccountId).get().getTransactions(), foundCustomer.getFirstName() + "_" + foundCustomer.getLastName());
                     log("Your file is present in the /files directory");
                 }
                 if (choice.equals("6")) {

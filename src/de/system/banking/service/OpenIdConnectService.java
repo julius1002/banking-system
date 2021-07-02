@@ -1,8 +1,7 @@
-package de.banking.spl.service;
+package de.system.banking.service;
 
 import java.io.IOException;
 import java.net.http.HttpResponse;
-import java.util.Map;
 
 public interface OpenIdConnectService {
 

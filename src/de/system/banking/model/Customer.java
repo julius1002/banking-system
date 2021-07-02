@@ -1,4 +1,4 @@
-package de.banking.spl.model;
+package de.system.banking.model;
 
 import java.util.List;
 

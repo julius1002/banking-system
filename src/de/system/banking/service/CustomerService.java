@@ -1,7 +1,7 @@
-package de.banking.spl.service;
+package de.system.banking.service;
 
-import de.banking.spl.model.Customer;
-import de.banking.spl.repository.CustomerRepository;
+import de.system.banking.model.Customer;
+import de.system.banking.repository.CustomerRepository;
 
 public class CustomerService {
 

@@ -1,6 +1,6 @@
-package de.banking.spl.service;
+package de.system.banking.service;
 
-import de.banking.spl.model.Transaction;
+import de.system.banking.model.BankingTransaction;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -8,14 +8,14 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Collection;
 
-public class TransactionPrintingService {
+public class BankingTransactionPrintingService {
 
     private String rootLocation = "";
 
-    private TransactionPrintingService() {
+    private BankingTransactionPrintingService() {
     }
 
-    public TransactionPrintingService(String rootLocation) {
+    public BankingTransactionPrintingService(String rootLocation) {
         this.rootLocation = rootLocation;
         try {
             Files.createDirectories(Path.of(rootLocation));
@@ -24,7 +24,7 @@ public class TransactionPrintingService {
         }
     }
 
-    public void createFile(Collection<Transaction> transactions, String fileName) {
+    public void createFile(Collection<BankingTransaction> bankingTransactions, String fileName) {
         try {
             FileWriter writer = new FileWriter(rootLocation + "/" + fileName + ".csv");
 
@@ -32,9 +32,9 @@ public class TransactionPrintingService {
 
             StringBuilder stringBuilder = new StringBuilder();
 
-            for (Transaction transaction : transactions) {
-                stringBuilder.append(Instant.ofEpochMilli(transaction.getTime()))
-                        .append(", ").append(transaction.getTransactionType()).append(", ").append(transaction.getAmount()).append(", ").append(transaction.isFailed()).append("\n");
+            for (BankingTransaction bankingTransaction : bankingTransactions) {
+                stringBuilder.append(Instant.ofEpochMilli(bankingTransaction.getTime()))
+                        .append(", ").append(bankingTransaction.getTransactionType()).append(", ").append(bankingTransaction.getAmount()).append(", ").append(bankingTransaction.isFailed()).append("\n");
             }
 
             writer.write(stringBuilder.toString());

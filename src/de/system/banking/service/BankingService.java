@@ -1,25 +1,23 @@
-package de.banking.spl.service;
-
-import de.banking.spl.model.BankAccount;
-import de.banking.spl.model.Transaction;
-import de.banking.spl.repository.BankAccountRepository;
-import de.banking.spl.repository.database.DatabaseTransactionRepository;
+package de.system.banking.service;
 
 import java.time.Instant;
 import java.util.Optional;
 
-import static de.banking.spl.model.TransactionType.*;
+import de.system.banking.model.BankAccount;
+import de.system.banking.model.BankingTransaction;
+import de.system.banking.model.BankingTransactionType;
+import de.system.banking.repository.BankAccountRepository;
 
-public class DatabaseBankingService extends BankingService {
-    private DatabaseTransactionRepository databaseTransactionRepository;
+public class BankingService {
 
-    public DatabaseBankingService(BankAccountRepository bankAccountRepository, DatabaseTransactionRepository databaseTransactionRepository) {
-        super(bankAccountRepository);
-        this.databaseTransactionRepository = databaseTransactionRepository;
+    protected BankAccountRepository bankAccountRepository;
+
+    public BankingService(BankAccountRepository bankAccountRepository) {
+        this.bankAccountRepository = bankAccountRepository;
     }
 
-    @Override
     public boolean withDraw(Long bankAccountId, Long amount) throws Exception {
+
         var optionalBankAccount = bankAccountRepository.findById(bankAccountId);
 
         var bankAccount = optionalBankAccount.isEmpty() ? null : optionalBankAccount.get();
@@ -28,23 +26,24 @@ public class DatabaseBankingService extends BankingService {
             return false;
         }
 
-        var transaction = new Transaction();
+        var transaction = new BankingTransaction();
         transaction.setAmount(amount);
         transaction.setTime(Instant.now().toEpochMilli());
-        transaction.setTransactionType(WITHDRAW);
+        transaction.setTransactionType(BankingTransactionType.WITHDRAW);
         transaction.setFailed(!bankAccount.isOverDraftEligible() && bankAccount.getBalance() - amount < 0);
+        bankAccount.getTransactions().add(transaction);
         boolean failed = transaction.isFailed();
 
         if (!failed) {
             bankAccount.setBalance(bankAccount.getBalance() - amount);
-            this.bankAccountRepository.update(bankAccount);
+            bankAccountRepository.update(bankAccount);
         }
-        this.databaseTransactionRepository.insert(transaction, bankAccountId);
+
         return !failed;
     }
 
-    @Override
     public boolean deposit(Long bankAccountId, Long amount) throws Exception {
+
         var optionalBankAccount = bankAccountRepository.findById(bankAccountId);
 
         var bankAccount = optionalBankAccount.isEmpty() ? null : optionalBankAccount.get();
@@ -53,37 +52,36 @@ public class DatabaseBankingService extends BankingService {
             return false;
         }
 
-        var transaction = new Transaction();
+        var transaction = new BankingTransaction();
 
         transaction.setAmount(amount);
         transaction.setTime(Instant.now().toEpochMilli());
-        transaction.setTransactionType(DEPOSIT);
+        transaction.setTransactionType(BankingTransactionType.DEPOSIT);
+        bankAccount.getTransactions().add(transaction);
         bankAccount.setBalance(bankAccount.getBalance() + amount);
-
-        this.bankAccountRepository.update(bankAccount);
-
-        databaseTransactionRepository.insert(transaction, bankAccountId);
         return true;
     }
 
-    @Override
     public boolean transfer(Long originId, Long destinationId, Long amount) throws Exception {
 
         Optional<BankAccount> bankAccount = bankAccountRepository.findById(originId);
         Optional<BankAccount> destinationBankAccount = bankAccountRepository.findById(destinationId);
 
-        if (bankAccount.isEmpty() || destinationBankAccount.isEmpty() || originId.equals(destinationId)) {
+        if (bankAccount.isEmpty() || destinationBankAccount.isEmpty()) {
             return false;
         }
 
         BankAccount origin = bankAccount.get();
         BankAccount destination = destinationBankAccount.get();
 
-        Transaction transaction = new Transaction();
-        transaction.setAmount(Math.negateExact(amount));
-        transaction.setTime(Instant.now().toEpochMilli());
-        transaction.setTransactionType(TRANSFER);
-        transaction.setFailed(origin.getBalance() - amount < 0);
+        BankingTransaction bankingTransaction = new BankingTransaction();
+        bankingTransaction.setAmount(Math.negateExact(amount));
+        bankingTransaction.setTime(Instant.now().toEpochMilli());
+        bankingTransaction.setTransactionType(BankingTransactionType.TRANSFER);
+        bankingTransaction.setFailed(origin.getBalance() - amount < 0);
+
+        origin.getTransactions().add(bankingTransaction);
+        destination.getTransactions().add(new BankingTransaction(bankingTransaction, amount));
 
         if (origin.getBalance() - amount < 0) {
             return false;
@@ -94,9 +92,6 @@ public class DatabaseBankingService extends BankingService {
 
         BankAccount updatedOrigin = this.bankAccountRepository.update(origin);
         BankAccount updatedDestination = this.bankAccountRepository.update(destination);
-
-        this.databaseTransactionRepository.insert(transaction, originId);
-        this.databaseTransactionRepository.insert(new Transaction(transaction, amount), destinationId);
 
         return !(updatedOrigin == null || updatedDestination == null);
     }
