@@ -5,6 +5,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 public class ResourceOwnerPasswordCredentialsService implements OpenIdConnectService {
 
@@ -19,16 +21,16 @@ public class ResourceOwnerPasswordCredentialsService implements OpenIdConnectSer
 
     @Override
     public HttpResponse<String> requestAccessToken(String username, String password, String scope) throws IOException, InterruptedException {
-        HttpRequest tokenRequest = HttpRequest.newBuilder().uri(URI.create(authorizationServerUri + "/token"))
+        var tokenRequest = HttpRequest.newBuilder().uri(URI.create(authorizationServerUri + "/token"))
                 .POST(HttpRequest.BodyPublishers.ofString("username=" + username + "&password=" + password + "&scope=" + scope))
-                .header("Authorization", "Basic MTpzZWN1cmU=")
+                .header("Authorization", "Basic " + Base64.getEncoder().encodeToString((username + password).getBytes(StandardCharsets.UTF_8)))
                 .header("Content-Type", "application/x-www-form-urlencoded").build();
         return client.send(tokenRequest, HttpResponse.BodyHandlers.ofString());
     }
 
     @Override
     public HttpResponse<String> requestUserInfo(String accessToken) throws IOException, InterruptedException {
-        HttpRequest userInfoRequest = HttpRequest.newBuilder().uri(URI.create(authorizationServerUri + "/userinfo"))
+        var userInfoRequest = HttpRequest.newBuilder().uri(URI.create(authorizationServerUri + "/userinfo"))
                 .header("Authorization", "Bearer " + accessToken)
                 .build();
         return client.send(userInfoRequest, HttpResponse.BodyHandlers.ofString());

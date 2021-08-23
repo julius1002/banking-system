@@ -69,8 +69,8 @@ public class DatabaseBankingService extends BankingService {
     @Override
     public boolean transfer(Long originId, Long destinationId, Long amount) throws Exception {
 
-        Optional<BankAccount> bankAccount = bankAccountRepository.findById(originId);
-        Optional<BankAccount> destinationBankAccount = bankAccountRepository.findById(destinationId);
+        var bankAccount = bankAccountRepository.findById(originId);
+        var destinationBankAccount = bankAccountRepository.findById(destinationId);
 
         if (bankAccount.isEmpty() || destinationBankAccount.isEmpty() || originId.equals(destinationId)) {
             return false;
@@ -92,8 +92,8 @@ public class DatabaseBankingService extends BankingService {
 
         destination.setBalance(destination.getBalance() + amount);
 
-        BankAccount updatedOrigin = this.bankAccountRepository.update(origin);
-        BankAccount updatedDestination = this.bankAccountRepository.update(destination);
+        var updatedOrigin = this.bankAccountRepository.update(origin);
+        var updatedDestination = this.bankAccountRepository.update(destination);
 
         this.databaseBankingTransactionRepository.insert(bankingTransaction, originId);
         this.databaseBankingTransactionRepository.insert(new BankingTransaction(bankingTransaction, amount), destinationId);

@@ -51,12 +51,12 @@ public class DatabaseCustomerRepository implements CustomerRepository {
 
     @Override
     public Customer update(Long id, Customer customer) throws Exception {
-        Optional<Customer> optionalCustomer = this.findById(id);
+        var optionalCustomer = this.findById(id);
         if (optionalCustomer.isEmpty()) {
             log("customer to update not found");
             return null;
         }
-        PreparedStatement preparedStatement =
+        var preparedStatement =
                 connection.prepareStatement("UPDATE customer SET firstName = ?, lastName = ?, passWord = ? WHERE id = ?");
         preparedStatement.setString(1, customer.getFirstName());
         preparedStatement.setString(2, customer.getLastName());
@@ -84,7 +84,7 @@ public class DatabaseCustomerRepository implements CustomerRepository {
         prepareStatement.setString(2, customer.getLastName());
         prepareStatement.setString(3, customer.getPassWord());
         prepareStatement.execute();
-        ResultSet resultSet = prepareStatement.getGeneratedKeys();
+        var resultSet = prepareStatement.getGeneratedKeys();
         if (resultSet.next()) {
             long id = resultSet.getLong("id");
             customer.setId(id);

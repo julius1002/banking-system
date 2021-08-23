@@ -26,11 +26,11 @@ public class App {
 
         boolean enableDatabase = true;
 
-        List<Customer> customers = new ArrayList<>();
-        List<BankAccount> bankAccounts = new ArrayList<>();
+        var customers = new ArrayList<Customer>();
+        var bankAccounts = new ArrayList<BankAccount>();
 
-        Customer preRegisteredCustomer = new Customer(1L, "Erika", "Musterfrau", "secret", new ArrayList<>());
-        BankAccount preRegisteredBankAccount = new BankAccount(123L, 5000L);
+        var preRegisteredCustomer = new Customer(1L, "Erika", "Musterfrau", "secret", new ArrayList<>());
+        var preRegisteredBankAccount = new BankAccount(123L, 5000L);
         preRegisteredBankAccount.setCustomer_id(preRegisteredCustomer.getId());
         bankAccounts.add(preRegisteredBankAccount);
         preRegisteredCustomer.getBankAccounts().add(preRegisteredBankAccount);
@@ -57,12 +57,12 @@ public class App {
             var connection = DriverManager.getConnection("jdbc:h2:~/test", "sa", "");
             createTables(connection);
 
-            DatabaseBankingTransactionRepository databaseBankingTransactionRepository = new DatabaseBankingTransactionRepository(connection);
+            var databaseBankingTransactionRepository = new DatabaseBankingTransactionRepository(connection);
             bankAccountRepository = new DatabaseBankAccountRepository(connection, databaseBankingTransactionRepository);
             customerRepository = new DatabaseCustomerRepository(connection, bankAccountRepository);
 
             preRegisteredCustomer.setFirstName(preRegisteredCustomer.getFirstName() + "@DB");
-            Customer insert = customerRepository.insert(preRegisteredCustomer);
+            var insert = customerRepository.insert(preRegisteredCustomer);
             bankAccounts.get(0).setCustomer_id(insert.getId());
             bankAccountRepository.insert(bankAccounts.get(0));
 
@@ -70,19 +70,19 @@ public class App {
 
         }
 
-        CustomerService customerService = new CustomerService(customerRepository);
+        var customerService = new CustomerService(customerRepository);
 
         /*
         Bootstrapping
          */
-        Scanner scanner = new Scanner(in);
+        var scanner = new Scanner(in);
 
         while (true) {
             log("Welcome to your Banking System.");
             log("Please enter a number to log in or type in 0 to register");
 
             log("Type 9 to login with an Identity Provider (OpenID)");
-            Long loginOrSignUp = Long.parseLong(scanner.nextLine());
+            var loginOrSignUp = Long.parseLong(scanner.nextLine());
 
             Customer foundCustomer = null;
             if (loginOrSignUp == 9) {
@@ -95,40 +95,40 @@ public class App {
                     String username = scanner.nextLine(); //value: m.mustermann@example.com
 
                     log("Type in your password");
-                    String password = scanner.nextLine(); //value: maxssecret
+                    var password = scanner.nextLine(); //value: maxssecret
 
-                    String authorizationServerUri = "http://localhost:3000";
+                    var authorizationServerUri = "http://localhost:3000";
 
-                    OpenIdConnectService openIdConnectService = new ResourceOwnerPasswordCredentialsService(authorizationServerUri);
+                    var openIdConnectService = new ResourceOwnerPasswordCredentialsService(authorizationServerUri);
 
-                    HttpResponse<String> tokenResponse = openIdConnectService.requestAccessToken(username, password, "profile email");
+                    var tokenResponse = openIdConnectService.requestAccessToken(username, password, "profile email");
 
                     status = tokenResponse.statusCode();
 
                     if (status == 200) {
 
-                        Gson gson = new GsonBuilder().create();
-                        Map<String, String> tokenBody = gson.fromJson(tokenResponse.body(), Map.class);
+                        var gson = new GsonBuilder().create();
+                        var tokenBody = gson.fromJson(tokenResponse.body(), Map.class);
 
-                        String token = tokenBody.get("token");
+                        var token = (String) tokenBody.get("token");
 
-                        HttpResponse<String> userInfoResponse = openIdConnectService.requestUserInfo(token);
+                        var userInfoResponse = openIdConnectService.requestUserInfo(token);
 
                         if (userInfoResponse.statusCode() == 200) {
-                            Map<String, Object> map = gson.fromJson(userInfoResponse.body(), Map.class);
+                            var map = gson.fromJson(userInfoResponse.body(), Map.class);
 
                             long id = (long) Double.parseDouble(map.get("id").toString());
 
-                            Optional<Customer> optionalCustomer = customerRepository.findById(id);
+                            var optionalCustomer = customerRepository.findById(id);
                             if (optionalCustomer.isEmpty()) {
                                 foundCustomer = new Customer();
                                 foundCustomer.setFirstName((String) map.get("firstName"));
                                 foundCustomer.setLastName((String) map.get("lastName"));
                                 foundCustomer.setPassWord(password);
                                 foundCustomer.setId(id);
-                                Customer registeredCustomer = customerService.insertCustomer(foundCustomer);
-                                BankAccount insertedBankAccount = bankAccountRepository.insert(new BankAccount(0L, Collections.emptyList(), false, registeredCustomer.getId()));
-                                ArrayList<BankAccount> newBankAccounts = new ArrayList<>();
+                                var registeredCustomer = customerService.insertCustomer(foundCustomer);
+                                var insertedBankAccount = bankAccountRepository.insert(new BankAccount(0L, Collections.emptyList(), false, registeredCustomer.getId()));
+                                var newBankAccounts = new ArrayList<BankAccount>();
                                 newBankAccounts.add(insertedBankAccount);
                                 foundCustomer.setBankAccounts(newBankAccounts);
 
@@ -148,25 +148,25 @@ public class App {
                 //oidc end
             } else if (loginOrSignUp == 0) {
                 log("Type your firstname\nType -1 to cancel");
-                String input = scanner.nextLine();
+                var input = scanner.nextLine();
                 if (input.equals("-1")) {
                     log("Processs canceled");
                 } else {
-                    Customer newCustomer = new Customer();
+                    var newCustomer = new Customer();
 
                     newCustomer.setFirstName(input);
 
                     log("Type your lastname");
-                    String lastName = scanner.nextLine();
+                    var lastName = scanner.nextLine();
                     newCustomer.setLastName(lastName);
 
                     log("Type in a password");
-                    String passWord = scanner.nextLine();
+                    var passWord = scanner.nextLine();
                     newCustomer.setPassWord(passWord);
 
-                    Customer registeredCustomer = customerService.insertCustomer(newCustomer);
-                    BankAccount insertedBankAccount = bankAccountRepository.insert(new BankAccount(0L, Collections.emptyList(), false, registeredCustomer.getId()));
-                    ArrayList<BankAccount> newBankAccounts = new ArrayList<>();
+                    var registeredCustomer = customerService.insertCustomer(newCustomer);
+                    var insertedBankAccount = bankAccountRepository.insert(new BankAccount(0L, Collections.emptyList(), false, registeredCustomer.getId()));
+                    var newBankAccounts = new ArrayList<BankAccount>();
                     newBankAccounts.add(insertedBankAccount);
                     registeredCustomer.setBankAccounts(newBankAccounts);
 
@@ -177,7 +177,7 @@ public class App {
 
 
             log("Please enter your User Id");
-            Long customerId = Long.parseLong(scanner.nextLine());
+            var customerId = Long.parseLong(scanner.nextLine());
 
             while (customerRepository.findById(customerId).isEmpty()) {
                 log("No User with that Id found\n Please try again");
@@ -187,7 +187,7 @@ public class App {
             foundCustomer = customerRepository.findById(customerId).get();
 
             log("Hello " + foundCustomer.getFirstName() + " " + foundCustomer.getLastName() + "!\nPlease enter your Password to continue.");
-            String passWord = scanner.nextLine();
+            var passWord = scanner.nextLine();
 
             while (!foundCustomer.getPassWord().equals(passWord)) {
                 log("Wrong password, please try again");
@@ -203,14 +203,14 @@ public class App {
             for (BankAccount bankAccount : foundCustomer.getBankAccounts()) {
                 log(bankAccount.getId().toString());
             }
-            Long bankAccountId = Long.parseLong(scanner.nextLine());
+            var bankAccountId = Long.parseLong(scanner.nextLine());
 
             while (!(bankAccountRepository.findById(bankAccountId).isPresent() && foundCustomer.getId().equals(bankAccountRepository.findById(bankAccountId).get().getCustomer_id()))) {
                 log("No bankaccount with that Id found\nPlease try again");
                 bankAccountId = Long.parseLong(scanner.nextLine());
             }
 
-            String choice = "";
+            var choice = "";
 
             while (!"-1".equals(choice)) {
 
@@ -274,7 +274,7 @@ public class App {
                                 bankingTransaction.getAmount() + ", " + bankingTransaction.isFailed());
                     }
                 }
-                BankingTransactionPrintingService bankingTransactionPrintingService = new BankingTransactionPrintingService("./files");
+                var bankingTransactionPrintingService = new BankingTransactionPrintingService("./files");
 
                 if (choice.equals("5")) {
                     bankingTransactionPrintingService.createFile(bankAccountRepository.findById(bankAccountId).get().getTransactions(), foundCustomer.getFirstName() + "_" + foundCustomer.getLastName());
@@ -303,7 +303,7 @@ public class App {
     }
 
     private static void createTables(Connection connection) throws SQLException {
-        String ddl = "DROP TABLE IF EXISTS transaction cascade; DROP TABLE IF EXISTS bankaccount cascade; DROP TABLE IF EXISTS customer cascade;" +
+        var ddl = "DROP TABLE IF EXISTS transaction cascade; DROP TABLE IF EXISTS bankaccount cascade; DROP TABLE IF EXISTS customer cascade;" +
                 "CREATE TABLE IF NOT EXISTS customer (id int AUTO_INCREMENT PRIMARY KEY, firstName VARCHAR (255), lastName VARCHAR (255), passWord VARCHAR(255));" +
                 "CREATE TABLE IF NOT EXISTS bankaccount (id int AUTO_INCREMENT PRIMARY KEY, balance int, overDraftEligible bit, customer_id int, FOREIGN KEY (customer_id) REFERENCES customer(id));" +
                 "CREATE TABLE IF NOT EXISTS transaction (id int AUTO_INCREMENT PRIMARY KEY, time TIMESTAMP, amount int, type VARCHAR(255), failed bit, bankaccount_id int, FOREIGN KEY (bankaccount_id) REFERENCES bankaccount(id));";

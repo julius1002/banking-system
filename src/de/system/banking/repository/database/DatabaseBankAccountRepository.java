@@ -47,7 +47,7 @@ public class DatabaseBankAccountRepository implements BankAccountRepository {
 
     @Override
     public BankAccount insert(BankAccount bankAccount) throws Exception {
-        PreparedStatement prepareStatement =
+        var prepareStatement =
                 connection.prepareStatement("INSERT INTO bankaccount (balance, overDraftEligible, customer_id) VALUES (?, ?, ?)", RETURN_GENERATED_KEYS);
         log("inserting bankaccount");
 
@@ -62,7 +62,7 @@ public class DatabaseBankAccountRepository implements BankAccountRepository {
             bankAccount.setId(id);
         }
 
-        List<BankingTransaction> bankingTransactions = dataBaseBankingTransactionRepository.insertAll(bankAccount.getTransactions(), bankAccount.getId());
+        var bankingTransactions = dataBaseBankingTransactionRepository.insertAll(bankAccount.getTransactions(), bankAccount.getId());
         bankAccount.setTransactions(bankingTransactions);
         return bankAccount;
     }
@@ -73,15 +73,15 @@ public class DatabaseBankAccountRepository implements BankAccountRepository {
 
     @Override
     public BankAccount update(BankAccount bankAccount) throws Exception {
-        Long bankAccountId = bankAccount.getId();
-        Optional<BankAccount> optionalBankAccount = findById(bankAccountId);
+        var bankAccountId = bankAccount.getId();
+        var optionalBankAccount = findById(bankAccountId);
 
         if (optionalBankAccount.isEmpty()) {
             log("no bankaccount found with id " + bankAccountId);
             return null;
         }
         log("updating bankaccount, id: " + bankAccountId);
-        PreparedStatement preparedStatement =
+        var preparedStatement =
                 connection.prepareStatement("UPDATE bankaccount SET balance = ?, overDraftEligible = ? WHERE id = ?");
         preparedStatement.setLong(1, bankAccount.getBalance());
         preparedStatement.setBoolean(2, bankAccount.isOverDraftEligible());

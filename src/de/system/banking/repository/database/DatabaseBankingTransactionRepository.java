@@ -23,7 +23,7 @@ public class DatabaseBankingTransactionRepository {
         var preparedStatement = connection.prepareStatement("SELECT * FROM transaction WHERE bankaccount_id = ?");
         preparedStatement.setLong(1, bankAccountId);
         var result = preparedStatement.executeQuery();
-        List<BankingTransaction> bankingTransactions = new ArrayList<>();
+        var bankingTransactions = new ArrayList<BankingTransaction>();
         while (result.next()) {
             Long time = result.getTimestamp("time").toInstant().toEpochMilli();
             Long amount = result.getLong("amount");
